@@ -29,7 +29,6 @@ ScanResult scan_directory(const ScanOptions &options) {
       continue;
     }
     std::error_code ec_size;
-    ;
     uintmax_t size = dir_entry.file_size(ec_size);
 
     if (ec_size) {
