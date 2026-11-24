@@ -1,6 +1,7 @@
 #include "duphunter/scanner.h"
 #include <filesystem>
 #include <fstream>
+#include <thread>
 #include <gtest/gtest.h>
 
 namespace fs = std::filesystem;
