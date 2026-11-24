@@ -27,7 +27,7 @@ if(DUPHUNTER_ENABLE_SANITIZERS)
     endif()
 endif()
 
-add_library(duphunter_core src/core.cpp src/scanner.cpp)
+add_library(duphunter_core src/core.cpp src/scanner.cpp src/thread_pool.cpp)
 target_include_directories(duphunter_core PUBLIC include)
 target_link_libraries(duphunter_core PUBLIC dh_sanitizers PRIVATE dh_warnings)
 

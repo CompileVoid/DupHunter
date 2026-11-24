@@ -5,7 +5,8 @@
 
 namespace fs = std::filesystem;
 
-static std::size_t create_test_file(const fs::path& path, std::string_view content) {
+static std::size_t create_test_file(const fs::path &path,
+                                    std::string_view content) {
   std::ofstream ofs(path, std::ios::binary);
   ofs.write(content.data(), static_cast<std::streamsize>(content.size()));
   return content.size();
@@ -62,4 +63,39 @@ TEST(ScannerTest, HandlesNonExistentPath) {
 
   EXPECT_EQ(result.files.size(), 0);
   EXPECT_EQ(result.total_scanned_size_bytes, 0);
+}
+
+TEST(ScannerTest, ParallelScanWithCancellation) {
+  fs::path test_dir = fs::temp_directory_path() / "duphunter_test_cancel";
+  fs::remove_all(test_dir);
+  fs::create_directories(test_dir);
+
+  const int file_count = 50000;
+  for (int i = 0; i < file_count; ++i) {
+    create_test_file(test_dir / ("file_" + std::to_string(i) + ".txt"), "data");
+  }
+
+  std::stop_source stop_source;
+  duphunter::ScanOptions options;
+  options.root_path = test_dir;
+  options.max_threads = 2;
+  options.stop_token = stop_source.get_token();
+
+  duphunter::ScanResult result;
+  std::jthread scan_thread(
+      [&]() { result = duphunter::scan_directory(options); });
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+  stop_source.request_stop();
+
+  scan_thread.join();
+
+  EXPECT_TRUE(result.cancelled) << "Scan should have been cancelled";
+
+  EXPECT_LT(result.files.size(), file_count)
+      << "Expected fewer than " << file_count
+      << " files due to cancellation, but got " << result.files.size();
+
+  fs::remove_all(test_dir);
 }
