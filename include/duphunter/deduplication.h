@@ -1,8 +1,10 @@
 #pragma once
 
 #include "scanner.h"
+
+#include <cstddef>
+#include <cstdint>
 #include <functional>
-#include <string>
 #include <vector>
 
 namespace duphunter {
@@ -23,6 +25,7 @@ struct DeduplicationResult {
 
 struct DeduplicationOptions {
   size_t partial_hash_size = 4096;
+  size_t max_threads = 4;
 };
 
 DeduplicationResult find_duplicates(const ScanResult &scan_result,

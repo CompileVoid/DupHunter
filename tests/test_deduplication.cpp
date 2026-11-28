@@ -106,3 +106,34 @@ TEST(DeduplicationTest, PartialHashCollisionResolvedByFullHash) {
 
   fs::remove_all(test_dir);
 }
+
+TEST(DeduplicationTest, ParallelHashingMatchesSequential) {
+  fs::path test_dir = fs::temp_directory_path() / "duphunter_test_parallel";
+  fs::remove_all(test_dir);
+  fs::create_directories(test_dir);
+
+  for (int i = 0; i < 50; ++i) {
+    std::string content = "content_for_group_" + std::to_string(i) +
+                          "_with_some_extra_data_to_make_it_longer";
+    create_file(test_dir / ("a_" + std::to_string(i) + ".txt"), content);
+    create_file(test_dir / ("b_" + std::to_string(i) + ".txt"), content);
+  }
+
+  duphunter::ScanOptions scan_opts;
+  scan_opts.root_path = test_dir;
+  auto scan_result = duphunter::scan_directory(scan_opts);
+
+  duphunter::DeduplicationOptions seq_opts;
+  seq_opts.max_threads = 1;
+  auto seq_result = duphunter::find_duplicates(scan_result, seq_opts);
+
+  duphunter::DeduplicationOptions par_opts;
+  par_opts.max_threads = 4;
+  auto par_result = duphunter::find_duplicates(scan_result, par_opts);
+
+  EXPECT_EQ(seq_result.groups.size(), par_result.groups.size());
+  EXPECT_EQ(seq_result.total_duplicates_found, par_result.total_duplicates_found);
+  EXPECT_EQ(seq_result.total_potential_savings, par_result.total_potential_savings);
+
+  fs::remove_all(test_dir);
+}
