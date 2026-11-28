@@ -27,7 +27,7 @@ if(DUPHUNTER_ENABLE_SANITIZERS)
     endif()
 endif()
 
-add_library(duphunter_core src/core.cpp src/scanner.cpp src/thread_pool.cpp)
+add_library(duphunter_core src/core.cpp src/scanner.cpp src/thread_pool.cpp src/deduplication.cpp)
 target_include_directories(duphunter_core PUBLIC include)
 target_link_libraries(duphunter_core PUBLIC dh_sanitizers PRIVATE dh_warnings)
 
@@ -36,7 +36,7 @@ target_link_libraries(duphunter PRIVATE duphunter_core dh_warnings)
 
 if(BUILD_TESTING)
     find_package(GTest CONFIG REQUIRED)
-    add_executable(duphunter_tests tests/test_smoke.cpp tests/test_scanner.cpp)
+    add_executable(duphunter_tests tests/test_smoke.cpp tests/test_scanner.cpp tests/test_deduplication.cpp)
     target_link_libraries(duphunter_tests PRIVATE duphunter_core dh_warnings GTest::gtest_main)
     include(GoogleTest)
     gtest_discover_tests(duphunter_tests)

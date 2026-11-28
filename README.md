@@ -9,7 +9,7 @@ Disk usage analyzer & duplicate file finder. C++23 core, CLI first, Qt GUI plann
 - [x] M0: Walking skeleton (CMake, vcpkg, GoogleTest, CI)
 - [x] M1: Single-threaded filesystem scanner with error handling
 - [x] M2: Thread pool + parallel scanning with C++20 stop_token cancellation
-- [ ] M3: Deduplication pipeline (size → partial hash → full hash)
+- [x] M3: Deduplication pipeline (size → partial hash → full hash)
 - [ ] M4: SQLite cache for incremental rescans
 - [ ] M5: Qt GUI
 
